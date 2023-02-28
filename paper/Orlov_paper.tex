@@ -1,0 +1,162 @@
+\documentclass[12pt]{article}
+\usepackage{arxiv}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{lipsum}
+\usepackage{graphicx}
+\usepackage{natbib}
+\usepackage{doi}
+\usepackage{verbatim}
+
+\usepackage{amsmath}
+\usepackage{mathtools}
+
+
+
+
+\title{Model distillation on multi-domained datasets}
+
+\author{ \textbf{Alexey Orlov}\\
+	MIPT\\
+        \texttt{orlov.as@hpystech.edu}\\
+	\And
+	\textbf{Andrey Grabovoy} \\
+	MIPT\\
+        \texttt{grabovoy.av@phystech.edu}\\
+	%% \AND
+	%% Coauthor \\
+	%% Affiliation \\
+	%% Address \\
+	%% \texttt{email} \\
+}
+\date{}
+
+\renewcommand{\undertitle}{}
+\renewcommand{\headeright}{}
+\renewcommand{\shorttitle}{Model distillation on multi-domained datasets}
+
+\hypersetup{
+pdftitle={Model distillation on multi-domained datasets},
+pdfauthor={Alexey Orlov},
+pdfkeywords={Distillation \and Neural network \and supervised learning},
+}
+
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+	The paper investigates the problem of reducing the complexity of the approximating model when transferred to new data of lower power. The concepts of a teacher for large dataset and a student for a small dataset are introduced. Methods based on the distillation of machine learning models, including the Bayesian approach, are considered. The paper is introduced that solving the optimization problem from the parameters of both models and domains improves the quality of the student's model. A computational experiment is being carried out on real and synthetic datasets for regression, classification and text recognition problems.
+\end{abstract}
+
+
+\keywords{Distillation \and Neural network \and supervised learning}
+
+
+\section{Introduction}
+
+One way to improve the quality of a machine learning algorithm is to use a model with a large number of parameters, whose answers can be used when training a model with a smaller number of parameters. Models with fewer parameters are more interpretable. The purpose of this work is to reduce the complexity of the machine learning model, as well as the transition to data of lower power. To do this, it is proposed to use two main methods -- distillation of models and domain adaptation.
+
+
+
+Machine learning model distillation uses model labels with more parameters to train a model with fewer parameters. In ~\cite{Hinton2015} discusses the method of distillation proposed by Geoffrey Hinton, taking into account teacher marks using the function \text{softmax} with a temperature parameter, and ~\cite{Vapnik2016} considers the combination of distillation methods proposed by Geoffrey Hinton and privileged information ~\cite{Vapnik2016} proposed by V. N. Vapnik into a generalized distillation. In probabilistic distillation, a sample generation hypothesis is introduced along with teacher responses. In ~\cite{Grabovoy2021}, Bayesian distillation of deep learning models is considered, which uses the posterior distribution of teacher model parameters along with teacher responses. Based on this posterior distribution, the prior distribution of the student model is given. Model distillation is used in a wide class of problems. 
+
+Different settings of domain adaptation problems are described in~\cite{DeepvisDA}, there are settings with partially tagged target domain and not tagged at all. Tasks with an unlabeled target domain are aimed at ensuring that models trained on synthetic data adapt to real data~\cite{UDA}. Thus, domain adaptation uses the tagged data of multiple source domains to perform new tasks in the target domain.
+
+One of the problem definitions of domain adaptation is image style transfer~\cite{image_to_image, Transfer_Learning}.
+So, in~\cite{image_to_image} it is proposed to use selfie images as a source domain and translate them into images of the desired art style based on a selection from the required style. In this way, synthetically generated training data can be used.
+
+In the distillation methods discussed above~\cite{Hinton2015, Vapnik2016, Grabovoy2021}, we consider the case when the teacher and student models approximate samples from different populations. For the distillation problem proposed by Geoffrey Hinton~\cite{Hinton2015}, the source and target data sets are the same.
+
+It is proposed to use, in addition to the labels of the teacher on one of the domains, the connection between the domains when training the student model. In this case, close general populations should serve as domains.
+
+Thus, real and generated images can serve as domains of different sizes. As mappings between images, normal noise, convolutional transformations, and image generation using the variance autoencoder model~\cite{VAE} are considered. Here we study mappings for which the existence of inverses is not considered. It is expected that the quality of the resulting models on one domain will exceed the quality of models that were not trained with teacher marks on another domain.
+
+Real data and a synthetic sample are used as experimental data. The \text{Fashion-MNIST}~\cite{FMNIST} sample, consisting of images of clothes, and the \text{MNIST}~\cite{MNIST} sample, consisting of images of handwritten numbers, are considered as real data.
+
+\section{Distillation problem statement}
+\subsection{Basic distillation problem statement}
+A sample is given
+$$\mathfrak{D}=(\mathbf{X},\mathbf{Y}), \quad \mathbf{X} \in \mathbb{X},
+\quad \mathbf{Y} \in \{1,...,R\},$$
+where $R$ is the number of classes in the classification problem.
+
+It is assumed that a trained model with a large number of parameters is given --- a teacher model. The teacher model $\mathbf{f}$ belongs to the parametric family of functions: $$\mathfrak{F}=\{\mathbf{f}|\mathbf{f}=\text{softmax}(\mathbf{v(x)} /T), \mathbf{v}:\mathbb{R}^{n}\rightarrow \mathbb{R}^{R}\}.$$
+
+It is required to train the student model with fewer parameters, taking into account the teacher's answers. The student model $\mathbf{g}$ belongs to the parametric family of functions: $$\mathfrak{G}=\{\mathbf{g}|\mathbf{g}=\text{softmax}(\mathbf{z(x)} /T), \mathbf{z}:\mathbb{R}^{n}\rightarrow \mathbb{R}^{R}\},$$
+where $\mathbf{v, z}$ are differentiable parametric functions of a given structure, $T$ is a temperature parameter with the properties:
+\begin{enumerate}
+     \item for $T \rightarrow 0$ one of the classes has unit probability;
+     \item for $T \rightarrow \infty$ all classes are equally probable.
+\end{enumerate}
+
+The loss function $\mathcal{L}$, which takes into account the teacher's model $\mathbf{f}$ when choosing the student's model $\mathbf{g}$, has the form:
+\[
+\begin{aligned}
+     \mathcal{L}(\mathbf{w,X,Y,f})=&-\sum\limits_{i=1}^{m}\sum\limits_{r=1}^{R}y_{i }^{r}\log{g^{r}(x_{i})}\bigr|_{T=1}\\
+     &-\sum\limits_{i=1}^{m}\sum\limits_{r=1}^{R}f^{r}(x_{i})\bigr|_{T=T_{0} }\log{g^{r}(x_{i})}\bigr|_{T=T_{0}},
+\end{aligned}
+\]
+where $\cdot\bigr|_{T=t}$ means that the temperature parameter $T$ in the previous function is equal to $t$.
+
+We get the optimization problem:
+$$\hat{\mathbf{w}} = \arg\min_{\mathbf{w} \in \mathbb{W}} \mathcal{L}(\mathbf{w,X,Y,f}).$$
+
+
+\subsection{Formulation of the distillation problem for a multidomain sample}
+
+Two samples are given:
+$$\mathfrak{D}_{\text{s}}=(\mathbf{X}_{\text{s}},\mathbf{Y}_{\text{s}}),
+\quad \mathbf{X}_{\text{s}} \in \mathbb{X}_{\text{s}},
+\quad \mathbf{Y}_{\text{s}} \in \mathbb{Y}$$
+$$\mathfrak{D}_{\text{t}}=(\mathbf{X}_{\text{t}},\mathbf{Y}_{\text{t}}), \quad \mathbf {X}_{\text{t}} \in \mathbb{X}_{\text{t}},
+\quad \mathbf{Y}_{\text{t}} \in \mathbb{Y},$$
+where $\mathfrak{D}_{\text{s}}, \mathfrak{D}_{\text{t}}$ are the source and destination datasets. In the basic formulation of the distillation problem, it is assumed that
+$\mathfrak{D}_{\text{t}} \subset \mathfrak{D}_{\text{s}},
+\mathbb{X}_{\text{t}}=\mathbb{X}_{\text{s}}$.
+
+It is assumed that the number of objects in the samples do not match:
+$$|\mathbf{X}_{\text{s}}| \gg |\mathbf{X}_{\text{t}}|$$
+
+Let the model of the teacher be given on a sample of higher power:
+$$\mathbf{f}: \mathbb{X}_{\text{s}} \rightarrow \mathbb{Y}^{\prime},$$
+where $\mathbf{f}$ is the teacher model, $\mathbb{Y}^{\prime}$ is the evaluation space.
+
+The relationship between the source and target samples is set:
+$$\varphi: \mathbb{X}_{\text{t}} \rightarrow \mathbb{X}_{\text{s}},$$
+where $\varphi$ is an injective mapping.
+
+It is required to obtain a student model for a low-resource sample:
+$$\mathbf{g}: \mathbb{X}_{\text{t}} \rightarrow \mathbb{Y}^{\prime},$$
+where $\mathbf{g}$ is the student model.
+
+The paper considers a loss function that takes into account teacher labels and the relationship between domains:
+\begin{enumerate}
+     \item for the regression task:
+     \[
+     \begin{aligned}
+     \mathcal{L}(\mathbf{w,X,Y,f,\varphi})=&\lambda\|\mathbf{y}-\mathbf{g}(\mathbf{x},\mathbf{w} )\|_{2}^{2}\\
+     &+(1-\lambda)\|\mathbf{g}(\mathbf{x},\mathbf{w})-(\mathbf{f}\circ \mathbf{\varphi})(\mathbf{x} )\|_{2}^{2};
+     \end{aligned}
+     \]
+     \item for classification task:
+     \[
+     \begin{aligned}
+     \mathcal{L}(\mathbf{w,X,Y,f,\varphi})=&-\lambda\sum\limits_{i=1}^{m}\sum\limits_{r=1}^{ R}\mathbb{I}[y_{i}=r]\log{g^{r}(\mathbf{x}_{i},\mathbf{w})}\\
+     &-(1-\lambda)\sum\limits_{i=1}^{m}\sum\limits_{r=1}^{R}(f\circ \varphi)^{r}(\mathbf{x }_{i})\log{g^{r}(\mathbf{x}_{i},\mathbf{w})},
+     \end{aligned}
+     \]
+     where $\lambda$ is a metaparameter specifying the distillation weight, $\mathbb{I}$ is an indicator function.
+\end{enumerate}
+
+We get the optimization problem:
+$$\hat{\mathbf{w}} = \arg\min_{\mathbf{w} \in \mathbb{W}} \mathcal{L}(\mathbf{w,X,Y,f,\varphi} ).$$
+\bibliographystyle{plain}
+\bibliography{Orlov2023}
+\end{document}
