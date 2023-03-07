@@ -15,8 +15,8 @@ Install
 -------
 .. code-block:: bash
 
-	git clone https://github.com/Intelligent-Systems-Phystech/ProjectTemplate.git /tmp/ProjectTemplate
-	python3 -m pip install /tmp/ProjectTemplate/src/
+	git clone https://github.com/Intelligent-Systems-Phystech/2023-Project-139.git /tmp/2023-Project-139
+	python3 -m pip install /tmp/2023-Project-139/src/
 
 Uninstall
 ---------
