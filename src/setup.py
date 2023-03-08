@@ -22,11 +22,11 @@ setup(
     name='mylib',
     version=__version__,
     license='MIT',
-    author='Andrey Grabovoy',
-    author_email="grabovoy.av@phystech.edu",
+    author='Orlov Alexey',
+    author_email="orlov.as@phystech.edu",
     description='mylib, python package',
     long_description=readme,
-    url='https://github.com/Intelligent-Systems-Phystech/ProjectTemplate',
+    url='https://github.com/intsystems/2023-Project-139',
 
     # options
     packages=find_packages(),
