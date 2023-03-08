@@ -183,7 +183,7 @@ class CNN_big(torch.nn.Module):
     def forward(self, input):
         return self.layers(input)
 
-def train_teacher(teacher, train_data, test_data, input_shape=[-1,784], epoxhs=10, SEED=42, phi=lambda x: x):
+def train_teacher(teacher, train_data, test_data, input_shape=[-1,784], epochs=10, SEED=42, phi=lambda x: x):
     """
     Function for training the teacher model for the classification task
     Args:
