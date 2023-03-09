@@ -44,15 +44,13 @@
 \hypersetup{
 pdftitle={Model distillation on multi-domained datasets},
 pdfauthor={Alexey Orlov},
-pdfkeywords={Distillation \and Neural network \and supervised learning},
-}
-
+pdfkeywords={Distillation \and Neural network \and supervised learning}}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-	The paper investigates the problem of reducing the complexity of the approximating model when transferred to new data of lower power. The concepts of a teacher for large dataset and a student for a small dataset are introduced. Methods based on the distillation of machine learning models, including the Bayesian approach, are considered. The paper is introduced that solving the optimization problem from the parameters of both models and domains improves the quality of the student's model. A computational experiment is being carried out on real and synthetic datasets for regression, classification and text recognition problems.
+	The paper investigates the problem of reducing the complexity of the approximating model when transferred to new data of lower cardinality. The concepts of a teacher model for large dataset and a student model for a small dataset are introduced. Methods based on the distillation of machine learning models, including the Bayesian approach, are considered. We consider the assumption that solving the optimization problem from the parameters of both models and domains improves the quality of the student's model. A computational experiment is being carried out on real and synthetic datasets for regression, classification and text recognition problems.
 \end{abstract}
 
 
@@ -61,11 +59,11 @@ pdfkeywords={Distillation \and Neural network \and supervised learning},
 
 \section{Introduction}
 
-One way to improve the quality of a machine learning algorithm is to use a model with a large number of parameters, whose answers can be used when training a model with a smaller number of parameters. Models with fewer parameters are more interpretable. The purpose of this work is to reduce the complexity of the machine learning model, as well as the transition to data of lower power. To do this, it is proposed to use two main methods -- distillation of models and domain adaptation.
+One way to improve the quality of a machine learning algorithm is to use a model with a large number of parameters, which answers can be used when training a model with a smaller number of parameters ~\cite{Hinton2015}. Models with fewer parameters are more interpretable. The purpose of this work is to reduce the complexity of the machine learning model, as well as the transition to data of lower power. To do this, it is proposed to use two main methods -- distillation of models and domain adaptation.
 
 
 
-Machine learning model distillation uses model labels with more parameters to train a model with fewer parameters. In ~\cite{Hinton2015} discusses the method of distillation proposed by Geoffrey Hinton, taking into account teacher marks using the function \text{softmax} with a temperature parameter, and ~\cite{Vapnik2016} considers the combination of distillation methods proposed by Geoffrey Hinton and privileged information ~\cite{Vapnik2016} proposed by V. N. Vapnik into a generalized distillation. In probabilistic distillation, a sample generation hypothesis is introduced along with teacher responses. In ~\cite{Grabovoy2021}, Bayesian distillation of deep learning models is considered, which uses the posterior distribution of teacher model parameters along with teacher responses. Based on this posterior distribution, the prior distribution of the student model is given. Model distillation is used in a wide class of problems. 
+Machine learning model distillation uses model labels with more parameters to train a model with fewer parameters. In paper ~\cite{Hinton2015} discusses the method of distillation proposed by G. Hinton, taking into account teacher marks using the function \text{softmax} with a temperature parameter, and ~\cite{Vapnik2016} considers the combination of distillation methods proposed by G. Hinton and privileged information ~\cite{Vapnik2016} proposed by V. N. Vapnik into a generalized distillation. In probabilistic distillation, a sample generation hypothesis is introduced along with teacher responses. In ~\cite{Grabovoy2021}, Bayesian distillation of deep learning models is considered, which uses the posterior distribution of teacher model parameters along with teacher responses. Based on this posterior distribution, the prior distribution of the student model is given. Model distillation is used in a wide class of problems. 
 
 Different settings of domain adaptation problems are described in~\cite{DeepvisDA}, there are settings with partially tagged target domain and not tagged at all. Tasks with an unlabeled target domain are aimed at ensuring that models trained on synthetic data adapt to real data~\cite{UDA}. Thus, domain adaptation uses the tagged data of multiple source domains to perform new tasks in the target domain.
 
@@ -78,13 +76,14 @@ It is proposed to use, in addition to the labels of the teacher on one of the do
 
 Thus, real and generated images can serve as domains of different sizes. As mappings between images, normal noise, convolutional transformations, and image generation using the variance autoencoder model~\cite{VAE} are considered. Here we study mappings for which the existence of inverses is not considered. It is expected that the quality of the resulting models on one domain will exceed the quality of models that were not trained with teacher marks on another domain.
 
-Real data and a synthetic sample are used as experimental data. The \text{Fashion-MNIST}~\cite{FMNIST} sample, consisting of images of clothes, and the \text{MNIST}~\cite{MNIST} sample, consisting of images of handwritten numbers, are considered as real data.
+Real data and a synthetic datasets are used as experimental data. The \text{Fashion-MNIST}~\cite{FMNIST} dataset, consisting of images of clothes, and the \text{MNIST}~\cite{MNIST} dataset, consisting of images of handwritten numbers, are considered as real data.
 
 \section{Distillation problem statement}
 \subsection{Basic distillation problem statement}
-A sample is given
-$$\mathfrak{D}=(\mathbf{X},\mathbf{Y}), \quad \mathbf{X} \in \mathbb{X},
-\quad \mathbf{Y} \in \{1,...,R\},$$
+A dataset is given
+$$\mathfrak{D}=\{(\mathbf{x_i}, \mathbf{y_i})\}_{i=1}^n,
+\quad \mathbf{x_i} \in \mathbb{X},
+\quad \mathbf{y_i} \in \{1,...,R\},$$
 where $R$ is the number of classes in the classification problem.
 
 It is assumed that a trained model with a large number of parameters is given --- a teacher model. The teacher model $\mathbf{f}$ belongs to the parametric family of functions: $$\mathfrak{F}=\{\mathbf{f}|\mathbf{f}=\text{softmax}(\mathbf{v(x)} /T), \mathbf{v}:\mathbb{R}^{n}\rightarrow \mathbb{R}^{R}\}.$$
@@ -112,17 +111,17 @@ $$\hat{\mathbf{w}} = \arg\min_{\mathbf{w} \in \mathbb{W}} \mathcal{L}(\mathbf{w,
 \subsection{Formulation of the distillation problem for a multidomain sample}
 
 Two samples are given:
-$$\mathfrak{D}_{\text{s}}=(\mathbf{X}_{\text{s}},\mathbf{Y}_{\text{s}}),
-\quad \mathbf{X}_{\text{s}} \in \mathbb{X}_{\text{s}},
-\quad \mathbf{Y}_{\text{s}} \in \mathbb{Y}$$
-$$\mathfrak{D}_{\text{t}}=(\mathbf{X}_{\text{t}},\mathbf{Y}_{\text{t}}), \quad \mathbf {X}_{\text{t}} \in \mathbb{X}_{\text{t}},
-\quad \mathbf{Y}_{\text{t}} \in \mathbb{Y},$$
+$$\mathfrak{D}_{\text{s}}=\{(\mathbf{x_i},\mathbf{y_i})\}_{i=1}^n,
+\quad \mathbf{x_i} \in \mathbb{X}_{\text{s}},
+\quad \mathbf{y_i} \in \mathbb{Y}$$
+$$\mathfrak{D}_{\text{t}}=\{(\mathbf{x_i},\mathbf{y_i})\}_{i=1}^m, \quad \mathbf {x_i} \in \mathbb{X}_{\text{t}},
+\quad \mathbf{y_i} \in \mathbb{Y},$$
 where $\mathfrak{D}_{\text{s}}, \mathfrak{D}_{\text{t}}$ are the source and destination datasets. In the basic formulation of the distillation problem, it is assumed that
 $\mathfrak{D}_{\text{t}} \subset \mathfrak{D}_{\text{s}},
 \mathbb{X}_{\text{t}}=\mathbb{X}_{\text{s}}$.
 
 It is assumed that the number of objects in the samples do not match:
-$$|\mathbf{X}_{\text{s}}| \gg |\mathbf{X}_{\text{t}}|$$
+$$n \gg m$$
 
 Let the model of the teacher be given on a sample of higher power:
 $$\mathbf{f}: \mathbb{X}_{\text{s}} \rightarrow \mathbb{Y}^{\prime},$$
@@ -130,7 +129,7 @@ where $\mathbf{f}$ is the teacher model, $\mathbb{Y}^{\prime}$ is the evaluation
 
 The relationship between the source and target samples is set:
 $$\varphi: \mathbb{X}_{\text{t}} \rightarrow \mathbb{X}_{\text{s}},$$
-where $\varphi$ is an injective mapping.
+where $\varphi$ is an injective mapping. 
 
 It is required to obtain a student model for a low-resource sample:
 $$\mathbf{g}: \mathbb{X}_{\text{t}} \rightarrow \mathbb{Y}^{\prime},$$
@@ -157,6 +156,83 @@ The paper considers a loss function that takes into account teacher labels and t
 
 We get the optimization problem:
 $$\hat{\mathbf{w}} = \arg\min_{\mathbf{w} \in \mathbb{W}} \mathcal{L}(\mathbf{w,X,Y,f,\varphi} ).$$
+
+\section{Computational experiment}
+The goal of computational experiment is to compare performance of teacher and student models on real and synthetic datasets with or without mapping $\varphi$ for classification and regression problems.
+\subsection{Data}
+\begin{enumerate}
+    \item FMNIST is a dataset of images of clothing items consisting of a training set of 60,000 examples and a test set of 10,000 examples. Each example is a 28x28 grayscale image, associated with a label from 10 classes  \citep{FMNIST}.
+    \item MMIST is a dataset of images of handwritten digits that also consisting of a training set of 60,000 examples and a test set of 10,000 examples. Each example is a 28x28 grayscale image, associated with a label from 10 classes \citep{MNIST}.
+    \item For the regression problem, a synthetic dataset is generated from the normal distribution.
+\end{enumerate}
+\subsection{Configuration of algorithm run}
+A multilayer perceptron with four hidden layers is considered as the teacher model $\textbf{f}$. A multilayer perceptron with one hidden layer is considered as the student model $\textbf{g}$.
+\begin{table}[h!t]
+\begin{center}
+\caption{Description of models}
+\label{table_1}
+\begin{tabular}{|c|c|c|}
+\hline
+	 & Teacher &\ Student\\
+	\hline
+	\multicolumn{1}{|l|}{Structure}
+	& [784,256,128,64,64,10]& [784,64,10]\\
+	\hline
+	\multicolumn{1}{|l|}{number of parameters}
+	& 246400 & 50816\\
+\hline
+
+\end{tabular}
+\end{center}
+\end{table}
+
+
+Activation function after each hidden layer -- ReLu. 
+We use Adam gradient optimization method \citep{Adam} to solve the optimization problem.
+
+Each of the samples consists of a training and a test part, while the training part is divided into multi-resource and low-resource parts. The training part contains 60,000 objects, the multi-resource part contains 59,000 objects, the low-resource part contains 1,000 objects, and the test part contains 10,000 objects.
+
+To analyze the quality of distillation, we use integral quality criterion ~\cite{Grabovoy2022}.
+
+\begin{table}[h!t]
+\begin{center}
+\caption{Datasets}
+\label{table_2}
+\begin{tabular}{|c|c|c|}
+\hline
+	Dataset & Explanation &\ Dataset size\\
+	\hline
+	\multicolumn{1}{|l|}{FashionMNIST-Train}
+	& Training part& 60000\\
+	\hline
+	\multicolumn{1}{|l|}{FashionMNIST-Big}
+	& Multi-resource part& 59000\\
+	\hline
+	\multicolumn{1}{|l|}{FashionMNIST-Small}
+	& Low-resource part& 1000\\
+	\hline
+	\multicolumn{1}{|l|}{FashionMNIST-Test}
+	& Test part& 10000\\
+	\hline
+	\multicolumn{1}{|l|}{MNIST-Train}
+	& Training part& 60000\\
+	\hline
+	\multicolumn{1}{|l|}{MNIST-Big}
+	& Multi-resource part& 59000\\
+	\hline
+	\multicolumn{1}{|l|}{MNIST-Small}
+	& Low-resource part& 1000\\
+	\hline
+	\multicolumn{1}{|l|}{MNIST-Test}
+	& Test part& 10000\\
+\hline
+
+\end{tabular}
+\end{center}
+\end{table}
+
+
+
 \bibliographystyle{plain}
 \bibliography{Orlov2023}
 \end{document}
