@@ -353,7 +353,7 @@ def distillation_train(student, train_data, test_data, input_shape=[-1,784], SEE
         
     return list_of_test_acc, list_of_test_losses, list_of_train_acc, list_of_train_losses
 
-def distillation_train_reg(student, train_data, test_data, SEED=1234, teacher=None, T=1, phi=lambda x: x):   
+def distillation_train_reg(student, train_data, test_data, SEED=1234, epochs=20, teacher=None, T=1, phi=lambda x: x):   
     """
     Function for training the student model for the regression task
     Args:
@@ -376,7 +376,6 @@ def distillation_train_reg(student, train_data, test_data, SEED=1234, teacher=No
     list_of_train_losses = []
     list_of_test_losses = []
 
-    epochs = 20
     attempts = 5
     
     for attempt in tqdm(range(attempts)):
