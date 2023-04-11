@@ -13,6 +13,7 @@
 \usepackage{natbib}
 \usepackage{doi}
 \usepackage{verbatim}
+\usepackage{subfig, epsfig}
 
 \usepackage{amsmath}
 \usepackage{mathtools}
@@ -50,7 +51,7 @@ pdfkeywords={Distillation \and Neural network \and supervised learning}}
 \maketitle
 
 \begin{abstract}
-	The paper investigates the problem of reducing the complexity of the approximating model when transferred to new data of lower cardinality. The concepts of a teacher model for large dataset and a student model for a small dataset are introduced. Methods based on the distillation of machine learning models, including the Bayesian approach, are considered. We consider the assumption that solving the optimization problem from the parameters of both models and domains improves the quality of the student's model. A computational experiment is being carried out on real and synthetic datasets for regression, classification and text recognition problems.
+	The paper investigates the problem of reducing the complexity of the approximating model when transferred to new data of lower cardinality. The concepts of a teacher model for large dataset and a student model for a small dataset are introduced. Methods based on the distillation of machine learning models, including the Bayesian approach, are considered. We consider the assumption that solving the optimization problem from the parameters of both models and domains improves the quality of the student's model. A computational experiment is being carried out on real datasets for computer vision and text processing tasks.
 \end{abstract}
 
 
@@ -137,14 +138,7 @@ where $\mathbf{g}$ is the student model.
 
 The paper considers a loss function that takes into account teacher labels and the relationship between domains:
 \begin{enumerate}
-     \item for the regression task:
-     \[
-     \begin{aligned}
-     \mathcal{L}(\mathbf{w,X,Y,f,\varphi})=&\lambda\|\mathbf{y}-\mathbf{g}(\mathbf{x},\mathbf{w} )\|_{2}^{2}\\
-     &+(1-\lambda)\|\mathbf{g}(\mathbf{x},\mathbf{w})-(\mathbf{f}\circ \mathbf{\varphi})(\mathbf{x} )\|_{2}^{2};
-     \end{aligned}
-     \]
-     \item for classification task:
+     \item for classification problem:
      \[
      \begin{aligned}
      \mathcal{L}(\mathbf{w,X,Y,f,\varphi})=&-\lambda\sum\limits_{i=1}^{m}\sum\limits_{r=1}^{ R}\mathbb{I}[y_{i}=r]\log{g^{r}(\mathbf{x}_{i},\mathbf{w})}\\
@@ -158,14 +152,13 @@ We get the optimization problem:
 $$\hat{\mathbf{w}} = \arg\min_{\mathbf{w} \in \mathbb{W}} \mathcal{L}(\mathbf{w,X,Y,f,\varphi} ).$$
 
 \section{Computational experiment}
-The goal of computational experiment is to compare performance of teacher and student models on real and synthetic datasets with or without mapping $\varphi$ for classification and regression problems.
+The goal of computational experiment is to compare performance of teacher and student models on real datasets with or without mapping $\varphi$ for computer vision and natural language processing tasks. To analyze the quality of distillation an integral quality criterion is proposed ~\cite{Grabovoy2022}.
 \subsection{Data}
 \begin{enumerate}
-    \item FMNIST is a dataset of images of clothing items consisting of a training set of 60,000 examples and a test set of 10,000 examples. Each example is a 28x28 grayscale image, associated with a label from 10 classes  \citep{FMNIST}.
-    \item MMIST is a dataset of images of handwritten digits that also consisting of a training set of 60,000 examples and a test set of 10,000 examples. Each example is a 28x28 grayscale image, associated with a label from 10 classes \citep{MNIST}.
-    \item For the regression problem, a synthetic dataset is generated from the normal distribution.
+    \item We use a subset of ImageNet --- a dataset of images, for which we need to solve the classification problem into 10 classes. The dataset consists of a training part and a test part, and the training part is divided into multi-resource and low-resource parts.\citep{IMAGENET}.
+    \item OPUS-100 is English-centric, meaning that all training pairs include English on either the source or target side. The article used fr-en and de-en datasets. \citep{OPUS100}
 \end{enumerate}
-\subsection{Configuration of algorithm run}
+\subsection{Configuration of algorithm run for CV}
 A multilayer perceptron with four hidden layers is considered as the teacher model $\textbf{f}$. A multilayer perceptron with one hidden layer is considered as the student model $\textbf{g}$.
 \begin{table}[h!t]
 \begin{center}
@@ -178,7 +171,7 @@ A multilayer perceptron with four hidden layers is considered as the teacher mod
 	\multicolumn{1}{|l|}{Structure}
 	& [784,256,128,64,64,10]& [784,64,10]\\
 	\hline
-	\multicolumn{1}{|l|}{number of parameters}
+	\multicolumn{1}{|l|}{Number of parameters}
 	& 246400 & 50816\\
 \hline
 
@@ -186,52 +179,132 @@ A multilayer perceptron with four hidden layers is considered as the teacher mod
 \end{center}
 \end{table}
 
+We present information about the structure and number of parameters for the student and teacher models in Table 1.
 
 Activation function after each hidden layer -- ReLu. 
 We use Adam gradient optimization method \citep{Adam} to solve the optimization problem.
 
 Each of the samples consists of a training and a test part, while the training part is divided into multi-resource and low-resource parts. The training part contains 60,000 objects, the multi-resource part contains 59,000 objects, the low-resource part contains 1,000 objects, and the test part contains 10,000 objects.
 
-To analyze the quality of distillation, we use integral quality criterion ~\cite{Grabovoy2022}.
-
 \begin{table}[h!t]
 \begin{center}
-\caption{Datasets}
-\label{table_2}
+\caption{ImageNet dataset}
+\label{table_10}
 \begin{tabular}{|c|c|c|}
 \hline
 	Dataset & Explanation &\ Dataset size\\
 	\hline
-	\multicolumn{1}{|l|}{FashionMNIST-Train}
-	& Training part& 60000\\
+	\multicolumn{1}{|l|}{ImageNet-Train}
+	& Training part& 9469\\
 	\hline
-	\multicolumn{1}{|l|}{FashionMNIST-Big}
-	& Multi-resource part& 59000\\
+	\multicolumn{1}{|l|}{ImageNet-Big}
+	& Multi-resource part& 8469\\
 	\hline
-	\multicolumn{1}{|l|}{FashionMNIST-Small}
+	\multicolumn{1}{|l|}{ImageNet-Small}
 	& Low-resource part& 1000\\
 	\hline
-	\multicolumn{1}{|l|}{FashionMNIST-Test}
-	& Test part& 10000\\
-	\hline
-	\multicolumn{1}{|l|}{MNIST-Train}
-	& Training part& 60000\\
-	\hline
-	\multicolumn{1}{|l|}{MNIST-Big}
-	& Multi-resource part& 59000\\
-	\hline
-	\multicolumn{1}{|l|}{MNIST-Small}
-	& Low-resource part& 1000\\
-	\hline
-	\multicolumn{1}{|l|}{MNIST-Test}
-	& Test part& 10000\\
+	\multicolumn{1}{|l|}{ImageNet-Test}
+	& Test part& 3925\\
 \hline
-
 \end{tabular}
 \end{center}
 \end{table}
 
+The Table 2 describes the datasets on which the CV computational experiment took place.
 
+
+\subsection{Configuration of algorithm run for NLP} 
+
+The OPUS100 dataset was divided into a training part for the teacher, consisting of German-English sentences, and a training dataset and a test dataset for the student, consisting of French-English sentences. The teacher's training dataset contained 5000 sentences, the student's training dataset contained 2000 sentences, and the test dataset contained 500 sentences.
+
+We used the student \textbf{g} and teacher \textbf{f} models as the transformer model based on article "Attention Is All You Need" \citep{Attention} and Adam gradient optimization method \citep{Adam} to solve the optimization problem. The NLLB model\citep{nllb} was used as the $\varphi$ mapping. This model translated French sentences into German sentences.
+
+The Table 3 describes the datasets on which the NLP computational experiment took place.
+
+\begin{table}[h!t]
+\begin{center}
+\caption{OPUS100 dataset}
+\label{table_10}
+\begin{tabular}{|c|c|c|c|}
+\hline
+	Dataset & Explanation & Language & Dataset size\\
+	\hline
+	\multicolumn{1}{|l|}{Teacher-Train}
+	& Teacher training part & de-en & 5000\\
+	\hline
+	\multicolumn{1}{|l|}{Student-Train}
+	& Student training part& fr-en & 2000\\
+	\hline
+	\multicolumn{1}{|l|}{Student-Test}
+	& Test part & fr-en & 500\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\section{Conclusion}
+
+\begin{figure}[h!t]\center
+\subfloat{\includegraphics[width=0.5\textwidth]{figures/Styletransfer_acc.jpg}}
+\subfloat{\includegraphics[width=0.5\textwidth]{figures/Styletransfer_loss.jpg}}\\
+\caption{Quality of approximation on the test sample. All results are averaged over 5 runs. a) accuracy; b) cross-entropy error between true and predicted student labels}
+\end{figure}
+
+As can be seen from Figure 1, models trained with the use of a teacher achieve better quality and accuracy.
+
+
+\begin{table}[h!t]
+\begin{center}
+\caption{Model quality for CV}
+\label{table_4}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+	Student & Teacher & Mapping $\varphi$ & Accuracy & \begin{tabular}[c]{@{}c@{}}Cross-entropy loss\end{tabular} & \begin{tabular}[c]{@{}c@{}}Integral\\ criterion\end{tabular}\\
+	\hline
+	\multicolumn{1}{|l|}{ImageNet-Small}
+	& --- & --- & $0{,}363 \pm 0{,}017$ & $3{,}849 \pm 0{,}866$ & $46{,}615 \pm 11{,}498$ \\
+    \hline
+	\multicolumn{1}{|l|}{ImageNet-Small}
+	& ImageNet-Big & --- & $\textbf{0{,}465} \pm \textbf{0{,}005}$ & $\textbf{1{,}876} \pm \textbf{0{,}066}$ & $\textbf{26{,}488} \pm \textbf{0{,}996}$ \\
+    \hline
+	\multicolumn{1}{|l|}{ImageNet-Small}
+	& ImageNet-Big & StyleTransfer & $0{,}411 \pm 0{,}008$ & $2{,}131 \pm 0{,}093$ & $29{,}476 \pm 1{,}495$ \\
+\hline
+\end{tabular}
+}
+\end{center}
+\end{table}
+
+The Table 4 shows the results of a comparison of student models obtained with and without the use of distillation.
+
+
+\begin{figure}[h!t]\center
+{\includegraphics[width=0.7 \textwidth]{figures/NLP_loss.png}}
+\caption{Cross-entropy error on the test dataset. All results are averaged over 3 runs.}
+\end{figure}
+
+As can be seen from Figure 2, models trained with the use of a teacher achieve better quality.
+
+The Table 5 shows the results of a comparison of student models obtained with and without the use of distillation.
+
+\begin{table}[h!t]
+\begin{center}
+\caption{Model quality for NLP}
+\label{table_16}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+	Student & Teacher & Mapping $\varphi$ & Cross-entropy loss& \begin{tabular}[c]{@{}c@{}}BLEU\end{tabular} \\
+\hline
+	\multicolumn{1}{|l|}{Student-Train}
+	& --- & ---& $5{,}367 \pm 0{,}015$ & $0{,}0282$ \\
+    \hline
+	\multicolumn{1}{|l|}{Student-Train}
+	& Teacher-Train & NLLB & $\textbf{5{,}233} \pm \textbf{0{,}007}$ & $\textbf{0{,}0572}$\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
 
 \bibliographystyle{plain}
 \bibliography{Orlov2023}
