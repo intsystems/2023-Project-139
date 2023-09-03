@@ -278,7 +278,7 @@ def train_teacher_reg(teacher, train_data, test_data, SEED=1234, phi=lambda x: x
             predict = teacher(phi(x))
             loss = loss_function(predict, y)
 
-def distillation_train(student, train_data, test_data, input_shape=[-1,784], SEED=42, epochs=20, teacher=None, T=1, phi=lambda x: x):   
+def distillation_train(student, train_data, test_data, input_shape=[-1,784], SEED=42, epochs=20, teacher=None, T=1, phi=lambda x: x, path='model.pt'):   
     """
     Function for training the student model for the classification task
     Args:
@@ -360,7 +360,7 @@ def distillation_train(student, train_data, test_data, input_shape=[-1,784], SEE
         list_of_test_acc.append(test_acc)
         list_of_train_losses.append(train_losses)
         list_of_test_losses.append(test_losses)
-        
+    save_my_model(student, epochs, optimizer, path, train_loss)
     return list_of_test_acc, list_of_test_losses, list_of_train_acc, list_of_train_losses
 
 def distillation_train_reg(student, train_data, test_data, SEED=1234, epochs=20, teacher=None, T=1, phi=lambda x: x):   
