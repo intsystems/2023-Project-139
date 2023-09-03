@@ -6,6 +6,15 @@ from sklearn import metrics
 from scipy.stats import norm
 import matplotlib.pyplot as plt
 
+
+def save_my_model(model, epoch, optim, path, loss):
+    torch.save({
+            'epoch': epoch,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optim.state_dict(),
+            'loss': loss,
+            }, path)
+
 def label_to_digit(mnist_dataset, fashion_targets):
     """
     Function that returns random image of specific class of MNIST dataset
@@ -183,7 +192,7 @@ class CNN_big(torch.nn.Module):
     def forward(self, input):
         return self.layers(input)
 
-def train_teacher(teacher, train_data, test_data, input_shape=[-1,784], epochs=10, SEED=42, phi=lambda x: x):
+def train_teacher(teacher, train_data, test_data, input_shape=[-1,784], epochs=10, SEED=42, phi=lambda x: x, path='model.pt'):
     """
     Function for training the teacher model for the classification task
     Args:
@@ -225,6 +234,7 @@ def train_teacher(teacher, train_data, test_data, input_shape=[-1,784], epochs=1
             y = y.to(teacher.device)
             predict = teacher(phi(x))
             loss = loss_function(predict, y)
+    save_my_model(teacher, epochs, optimizer, path, loss)
             
 def train_teacher_reg(teacher, train_data, test_data, SEED=1234, phi=lambda x: x):
     """
